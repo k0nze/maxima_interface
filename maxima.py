@@ -6,7 +6,7 @@ import psutil
 
 
 class Maxima:
-    def __init__(self, port):
+    def __init__(self, port=65432):
         self.port = port
 
         self.maxima_thread = None
