@@ -1,12 +1,12 @@
 import time
 
-from maxima import Maxima
+from maxima_interface import MaximaInterface
 
 if __name__ == "__main__":
-    m = Maxima()
+    mi = MaximaInterface(debug=True)
 
     for i in range(3):
-        print(i)
+        # print(i)
         time.sleep(1)
 
-    m.terminate()
+    mi.terminate()
