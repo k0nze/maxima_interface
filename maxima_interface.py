@@ -43,6 +43,7 @@ class MaximaInterface:
 
         self.maxima_pid = -1
 
+        # setup connection between maxima and server
         self.open_command_pipe()
         self.start_maxima_server()
         self.start_maxima()
@@ -75,8 +76,11 @@ class MaximaInterface:
         self.maxima_server_thread.start()
 
     def start_socket_server(self):
-        command = None
+        # first command to maxima is to turn off pretty printing
+        command = "display2d:false$"
+        # open socket server
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            # wait for incoming connection from maxima
             s.bind((self.host, self.port))
             s.listen()
             conn, addr = s.accept()
@@ -98,14 +102,16 @@ class MaximaInterface:
                     # waiting for maximas response
                     self.maxima_server_state = MaximaServerState.WAITING_FOR_MAXIMA
                     self.debug_message(f"server: state={self.maxima_server_state}")
-                    data = conn.recv(1024).decode()
-                    if not data:
+                    response = conn.recv(1024).decode()
+                    if not response:
                         break
 
-                    self.debug_message(f'server: received "{data}"')
-                    self.interpret_maxima_response(data)
+                    # interpret maxima's response
+                    self.debug_message(f'server: received "{response}"')
+                    self.interpret_maxima_response(response)
 
-                    got_prompt = self.check_if_prompt(data)
+                    # check if maxima is ready to accept new commands
+                    got_prompt = self.check_if_prompt(response)
                     self.debug_message(f"server: got prompt: {got_prompt}")
 
                     if got_prompt:

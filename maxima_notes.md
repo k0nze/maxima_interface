@@ -5,3 +5,10 @@
 ```
 maxima -s PORT
 ```
+
+## Maxima commands
+
+Turn off pretty printing
+```
+display2d:false$
+```
