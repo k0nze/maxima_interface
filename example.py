@@ -1,12 +1,9 @@
 import time
+import os
 
 from maxima_interface import MaximaInterface
 
 if __name__ == "__main__":
-    mi = MaximaInterface(debug=True)
-
-    for i in range(3):
-        # print(i)
-        time.sleep(1)
-
-    mi.terminate()
+    mi = MaximaInterface(port=65433, debug=True)
+    mi.raw_command("a: 1;")
+    # mi.close()
