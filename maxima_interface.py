@@ -106,8 +106,7 @@ class MaximaInterface:
                     # interpret maxima's response
                     self.debug_message(f'server: received "{response}"')
                     result = self.interpret_maxima_response(response[0])
-                    if result is not None:
-                        os.write(self.result_pipe_write, result.encode())
+                    self.debug_message(f'server: maxima result "{result}"')
 
                     # check if maxima is ready to accept new commands
                     got_prompt = self.check_if_prompt(response[-1])
@@ -115,6 +114,11 @@ class MaximaInterface:
 
                     if got_prompt:
                         self.maxima_server_state = MaximaServerState.WAITING_FOR_COMMAND
+
+                        # return result after the server is in correct state to accept a new command
+                        if result is not None:
+                            os.write(self.result_pipe_write, result.encode())
+
                         self.debug_message(f"server: state={self.maxima_server_state}")
                         command = os.read(self.command_pipe_read, 1024).decode()
                         self.debug_message(f'server: received command: "{command}"')
