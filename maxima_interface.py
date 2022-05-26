@@ -117,6 +117,7 @@ class MaximaInterface:
 
                         # return result after the server is in correct state to accept a new command
                         if result is not None:
+                            self.debug_message(f'server: returning result "{result}"')
                             os.write(self.result_pipe_write, result.encode())
 
                         self.debug_message(f"server: state={self.maxima_server_state}")
