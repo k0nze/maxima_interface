@@ -272,10 +272,3 @@ class MaximaInterface:
             self.__debug_message(f'sending command to server: "{command_string}"')
             os.write(self.command_pipe_write, command_string.encode())
             return os.read(self.result_pipe_read, 1024).decode()
-
-    def reset(self) -> None:
-        """Resets maxima environment"""
-        self.__debug_message(f'resetting maxima environment"')
-        self.raw_command("reset(); kill(all);")
-        # TODO fix
-        # self.raw_command(self.maxima_setup_command)

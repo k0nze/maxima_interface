@@ -17,9 +17,3 @@ class TestMaximaInterface(unittest.TestCase):
         result = self.mi.raw_command("a: 1;")
         result = self.mi.raw_command("a;")
         self.assertEqual("1", result)
-
-    def testReset(self):
-        result = self.mi.raw_command("a: 1;")
-        self.mi.reset()
-        result = self.mi.raw_command("a;")
-        self.assertEqual("a", result)
