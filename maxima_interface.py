@@ -2,6 +2,7 @@ import socket
 import subprocess
 import threading
 import os
+from typing import List, Optional
 import psutil
 import logging
 import sys
@@ -25,7 +26,7 @@ class MaximaServerState(Enum):
 
 
 class MaximaInterface:
-    def __init__(self, port=65432, debug=False):
+    def __init__(self, port: int = 65432, debug: bool = False) -> None:
         self.debug = debug
         if self.debug:
             logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
@@ -58,20 +59,20 @@ class MaximaInterface:
 
         self.debug_message("initialized.")
 
-    def debug_message(self, message):
+    def debug_message(self, message: str) -> None:
         logging.debug(f"{self.__class__.__name__}: {message}")
 
-    def open_command_pipe(self):
+    def open_command_pipe(self) -> None:
         self.command_pipe_read, self.command_pipe_write = os.pipe()
 
-    def open_result_pipe(self):
+    def open_result_pipe(self) -> None:
         self.result_pipe_read, self.result_pipe_write = os.pipe()
 
-    def start_maxima_server(self):
+    def start_maxima_server(self) -> None:
         self.maxima_server_thread = threading.Thread(target=self.start_socket_server)
         self.maxima_server_thread.start()
 
-    def start_socket_server(self):
+    def start_socket_server(self) -> None:
         # state variable to indicate that a result has been received
         # this to not overwrite the maxima's result as maxima sends the result
         # and the prompt at different times
@@ -137,13 +138,13 @@ class MaximaInterface:
                         command = os.read(self.command_pipe_read, 1024).decode()
                         self.debug_message(f'server: received command: "{command}"')
 
-    def check_if_prompt(self, response):
+    def check_if_prompt(self, response) -> bool:
         for l in response:
             if str.startswith(l, "(%i"):
                 return True
         return False
 
-    def interpret_maxima_response(self, response):
+    def interpret_maxima_response(self, response: List[str]) -> Optional[str]:
         maxima_result = None
 
         for l in response:
@@ -151,16 +152,16 @@ class MaximaInterface:
 
             # check if response is valid maxima output
             if str.startswith(line, "(%o"):
-                # format response
+                # format result by removing prompt and white space
                 end_of_prefix = line.find(")")
                 maxima_result = line[end_of_prefix + 2 :].strip()
             return maxima_result
 
-    def start_maxima(self):
+    def start_maxima(self) -> None:
         self.maxima_thread = threading.Thread(target=self.connect_maxima_to_server)
         self.maxima_thread.start()
 
-    def connect_maxima_to_server(self):
+    def connect_maxima_to_server(self) -> None:
         maxima_command = f"maxima -s {self.port}"
         process = subprocess.Popen(
             maxima_command,
@@ -177,7 +178,7 @@ class MaximaInterface:
         for line in stdout_iterator:
             self.debug_message(f"maxima: {line.decode()}")
 
-    def close(self):
+    def close(self) -> None:
         # send SIGTERM to maxima sub process
         self.kill_subprocess(self.maxima_pid)
         # terminate maxima thread
@@ -194,13 +195,13 @@ class MaximaInterface:
         os.close(self.result_pipe_read)
         os.close(self.result_pipe_write)
 
-    def kill_subprocess(self, pid):
+    def kill_subprocess(self, pid: int) -> None:
         process = psutil.Process(pid)
         for proc in process.children(recursive=True):
             proc.kill()
         process.kill()
 
-    def raw_command(self, command_string):
+    def raw_command(self, command_string: str) -> None:
         # check if maxima server is waiting for a command
         if self.maxima_server_state != MaximaServerState.WAITING_FOR_COMMAND:
             self.debug_message("server is not accepting commands.")
