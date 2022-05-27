@@ -1,3 +1,9 @@
+"""
+Author: Konstantin (k0nze) Lübeck
+License: BSD 3-Clause License
+Copyright (c) 2022 Konstantin (k0nze) Lübeck
+"""
+
 import socket
 import subprocess
 import threading
