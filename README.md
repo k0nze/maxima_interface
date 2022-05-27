@@ -1,4 +1,4 @@
-# Interfacing Maxima with Python
+# Interfacing Maxima CAS with Python
 
 ## Setup
 
