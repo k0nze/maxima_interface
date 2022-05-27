@@ -1,1 +1,2 @@
 pre-commit==2.18.*
+psutil==5.9.*
