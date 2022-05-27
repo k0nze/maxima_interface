@@ -1,3 +1,4 @@
+import re
 import socket
 import subprocess
 import threading
@@ -72,6 +73,11 @@ class MaximaInterface:
         self.maxima_server_thread.start()
 
     def start_socket_server(self):
+        # state variable to indicate that a result has been received
+        # this to not overwrite the maxima's result as maxima sends the result
+        # and the prompt at different times
+        got_result = False
+
         # first command to maxima is to turn off pretty printing
         command = "display2d:false$"
         # open socket server
@@ -98,6 +104,8 @@ class MaximaInterface:
                     # waiting for maximas response
                     self.maxima_server_state = MaximaServerState.WAITING_FOR_MAXIMA
                     self.debug_message(f"server: state={self.maxima_server_state}")
+
+                    # a response is composed out of several lines
                     response = conn.recv(1024).decode()
                     if not response:
                         break
@@ -105,39 +113,49 @@ class MaximaInterface:
 
                     # interpret maxima's response
                     self.debug_message(f'server: received "{response}"')
-                    result = self.interpret_maxima_response(response[0])
-                    self.debug_message(f'server: maxima result "{result}"')
+                    if not got_result:
+                        result = self.interpret_maxima_response(response)
+                        self.debug_message(f'server: maxima result "{result}"')
+                    if result is not None:
+                        got_result = True
+                        self.debug_message(f"server: got_result={got_result}")
 
                     # check if maxima is ready to accept new commands
-                    got_prompt = self.check_if_prompt(response[-1])
-                    self.debug_message(f"server: got prompt: {got_prompt}")
+                    got_prompt = self.check_if_prompt(response)
+                    self.debug_message(f"server: got_prompt={got_prompt}")
 
                     if got_prompt:
                         self.maxima_server_state = MaximaServerState.WAITING_FOR_COMMAND
+                        self.debug_message(f"server: state={self.maxima_server_state}")
 
                         # return result after the server is in correct state to accept a new command
                         if result is not None:
                             self.debug_message(f'server: returning result "{result}"')
                             os.write(self.result_pipe_write, result.encode())
+                            got_result = False
 
-                        self.debug_message(f"server: state={self.maxima_server_state}")
+                        # server waits for new command
                         command = os.read(self.command_pipe_read, 1024).decode()
                         self.debug_message(f'server: received command: "{command}"')
 
     def check_if_prompt(self, response):
-        if str.startswith(response, "(%i"):
-            return True
+        for l in response:
+            if str.startswith(l, "(%i"):
+                return True
         return False
 
     def interpret_maxima_response(self, response):
-        # check if response is valid maxima output
-        response = response.strip()
-        if str.startswith(response, "(%o"):
-            # format response
-            end_of_prefix = response.find(")")
-            result = response[end_of_prefix + 2 :].strip()
-            return result
-        return None
+        maxima_result = None
+
+        for l in response:
+            line = l.strip()
+
+            # check if response is valid maxima output
+            if str.startswith(line, "(%o"):
+                # format response
+                end_of_prefix = line.find(")")
+                maxima_result = line[end_of_prefix + 2 :].strip()
+            return maxima_result
 
     def start_maxima(self):
         self.maxima_thread = threading.Thread(target=self.connect_maxima_to_server)
