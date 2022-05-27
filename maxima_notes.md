@@ -12,3 +12,9 @@ Turn off pretty printing
 ```
 display2d:false$
 ```
+
+Reset whole environment
+```
+reset();
+kill(all);
+```

@@ -53,6 +53,7 @@ class MaximaInterface:
         self.maxima_thread = None
 
         self.maxima_pid = -1
+        self.maxima_setup_command = "display2d:false$"
 
         # setup connection between maxima and server
         self.__open_command_pipe()
@@ -95,7 +96,7 @@ class MaximaInterface:
         got_result = False
 
         # first command to maxima is to turn off pretty printing
-        command = "display2d:false$"
+        command = self.maxima_setup_command
         # open socket server
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             # wait for incoming connection from maxima
@@ -271,3 +272,10 @@ class MaximaInterface:
             self.__debug_message(f'sending command to server: "{command_string}"')
             os.write(self.command_pipe_write, command_string.encode())
             return os.read(self.result_pipe_read, 1024).decode()
+
+    def reset(self) -> None:
+        """Resets maxima environment"""
+        self.__debug_message(f'resetting maxima environment"')
+        self.raw_command("reset(); kill(all);")
+        # TODO fix
+        # self.raw_command(self.maxima_setup_command)
