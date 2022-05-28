@@ -1,3 +1,5 @@
 pre-commit==2.18.*
-bumpver==2022.*
 psutil==5.9.*
+build==0.8.*
+twine==4.0.*
+bumpver==2022.*
