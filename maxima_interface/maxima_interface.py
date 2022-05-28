@@ -17,12 +17,19 @@ from typing import List, Optional
 from enum import Enum
 
 
+class MaximaNotInstalled(Exception):
+    def __str__(self):
+        return "'maxima' command cound not be found on this system."
+
+
 class MaximaServerNotAcceptingCommandException(Exception):
-    pass
+    def __str__(self):
+        return "maxima server does not accept a command, it is waiting for a response from maxima."
 
 
 class NoMaximaPrompt(Exception):
-    pass
+    def __str__(self):
+        return "maxima does not accept a command."
 
 
 class MaximaServerState(Enum):
@@ -36,6 +43,10 @@ class MaximaInterface:
         """
         Starts a socket server at port and starts a maxima client process that connects
         to the socket server
+
+        Raises:
+            MaximaNotInstalled: when maxima command can not be found
+
         Args:
             port (int, optional): port for maxima/socket server communication. Defaults to 65432.
             debug (bool, optional): enables debug print outs. Defaults to False.
@@ -61,9 +72,13 @@ class MaximaInterface:
         self.maxima_pid = -1
         self.maxima_setup_command = "display2d:false$"
 
+        # check if maxima is installedc$a
+        if not self.__is_maxima_installed():
+            raise MaximaNotInstalled()
+
         # setup connection between maxima and server
         self.__open_command_pipe()
-        self.open_result_pipe()
+        self.__open_result_pipe()
         self.__start_maxima_server()
         self.__start_maxima()
 
@@ -81,11 +96,16 @@ class MaximaInterface:
         """
         logging.debug(f"{self.__class__.__name__}: {message}")
 
+    def __is_maxima_installed(self) -> bool:
+        """checks if maxima is installed"""
+        process = subprocess.Popen("which maxima", shell=True, stdout=subprocess.PIPE)
+        return process.communicate()[0]
+
     def __open_command_pipe(self) -> None:
         """creates a names pipe to send commands to the socket server"""
         self.command_pipe_read, self.command_pipe_write = os.pipe()
 
-    def open_result_pipe(self) -> None:
+    def __open_result_pipe(self) -> None:
         """creates a names pipe the socket server writes the maxima results into"""
         self.result_pipe_read, self.result_pipe_write = os.pipe()
 
