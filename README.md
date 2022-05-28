@@ -23,4 +23,6 @@ mi.raw_command("a: 1;")
 result = mi.raw_command("a;")
 
 print(result)
+
+mi.close()
 ```
