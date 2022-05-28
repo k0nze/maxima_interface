@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "maxima_interface"
-version = "0.1.0"
+version = "0.1.1"
 description = "Interfacing Maxima CAS with Python"
 readme = "README.md"
 authors = [{ name = "Konstantin (k0nze) Lübeck", email = "admin@konze.org" }]
