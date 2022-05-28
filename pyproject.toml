@@ -1,0 +1,42 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maxima_interface"
+version = "0.1.0"
+description = "Interfacing Maxima CAS with Python"
+readme = "README.md"
+authors = [{ name = "Konstantin (k0nze) Lübeck", email = "admin@konze.org" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: BSD License",
+	"Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["maxima", "cas"]
+dependencies = [
+    "psutil == 5.9.*"
+]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = ["pre-commit", "bumpver"]
+
+[project.urls]
+Homepage = "https://github.com/k0nze/maxima_interface"
+
+[tool.bumpver]
+current_version = "0.1.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = ['current_version = "{version}"',]
+"src/maxima_interface/__init__.py" = ["{version}"]
