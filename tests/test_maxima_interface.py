@@ -1,8 +1,12 @@
 import unittest
+import pathlib
 import os
 import sys
 
-sys.path.append(os.path.realpath(".."))
+dir_path = pathlib.Path(__file__).parent.resolve()
+src_dir_path = pathlib.Path.joinpath(dir_path, "../src")
+sys.path.append(str(src_dir_path))
+
 from maxima_interface import MaximaInterface
 
 

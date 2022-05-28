@@ -1,4 +1,4 @@
-from maxima_interface import MaximaInterface
+from src.maxima_interface import MaximaInterface
 
 if __name__ == "__main__":
     mi = MaximaInterface()
